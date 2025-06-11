@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 def test_api_key(api_key: str):
     """Test if the Google AI API key works."""
@@ -41,6 +42,8 @@ def test_api_key(api_key: str):
 
 if __name__ == "__main__":
     # The API key provided
-    API_KEY = "AIzaSyDOvSL6kgq6a8O2sGYj-fGVnsxr8ULD1o0"
+    API_KEY = os.getenv("GOOGLE_API_KEY")
+    if not API_KEY:
+        raise ValueError("GOOGLE_API_KEY environment variable must be set")
     
     test_api_key(API_KEY) 

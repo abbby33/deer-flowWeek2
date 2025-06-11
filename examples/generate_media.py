@@ -4,7 +4,9 @@ from src.tools.imagen import ImageGenerationTool
 from src.tools.speech import SpeechGenerationTool
 
 # API key
-API_KEY = "AIzaSyDOvSL6kgq6a8O2sGYj-fGVnsxr8ULD1o0"
+API_KEY = os.getenv("GOOGLE_API_KEY")
+if not API_KEY:
+    raise ValueError("GOOGLE_API_KEY environment variable must be set")
 
 def test_image_generation():
     """Test image generation."""

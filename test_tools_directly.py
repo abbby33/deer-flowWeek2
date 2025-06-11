@@ -60,7 +60,9 @@ def test_speech_generation(api_key):
 
 def main():
     # Get API key
-    api_key = "AIzaSyDOvSL6kgq6a8O2sGYj-fGVnsxr8ULD1o0"
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY environment variable must be set")
     
     # Run tests
     image_success = test_image_generation(api_key)

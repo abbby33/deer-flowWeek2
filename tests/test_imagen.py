@@ -2,7 +2,9 @@ from src.tools.imagen import ImageGenerationTool
 import os
 
 def test_image_generation():
-    api_key = os.getenv("GOOGLE_API_KEY", "AIzaSyDOvSL6kgq6a8O2sGYj-fGVnsxr8ULD1o0")
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY environment variable must be set")
     tool = ImageGenerationTool(api_key=api_key)
     
     # Generate images

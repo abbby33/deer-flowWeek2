@@ -3,7 +3,9 @@ import os
 from src.workflow import run_agent_workflow_async
 
 # API key
-API_KEY = "AIzaSyDOvSL6kgq6a8O2sGYj-fGVnsxr8ULD1o0"
+API_KEY = os.getenv("GOOGLE_API_KEY")
+if not API_KEY:
+    raise ValueError("GOOGLE_API_KEY environment variable must be set")
 
 async def test_image_generation():
     """Test image generation through the agent system."""
