@@ -11,6 +11,8 @@ import {
   UserCheck,
   Users,
   type LucideIcon,
+  Image,
+  Mic,
 } from "lucide-react";
 
 export type GraphNode = Node<{
@@ -31,6 +33,7 @@ const ROW_3 = ROW_HEIGHT * 2;
 const ROW_4 = ROW_HEIGHT * 2;
 const ROW_5 = ROW_HEIGHT * 3;
 const ROW_6 = ROW_HEIGHT * 4;
+const ROW_7 = ROW_HEIGHT * 5;
 
 export const graph: Graph = {
   nodes: [
@@ -76,10 +79,20 @@ export const graph: Graph = {
       position: { x: 125, y: ROW_6 },
     },
     {
+      id: "ImageGenerator",
+      data: { icon: Image, label: "Image Generator" },
+      position: { x: -75, y: ROW_7 },
+    },
+    {
+      id: "SpeechGenerator",
+      data: { icon: Mic, label: "Speech Generator" },
+      position: { x: 125, y: ROW_7 },
+    },
+    {
       id: "End",
       type: "circle",
       data: { label: "End" },
-      position: { x: 330, y: ROW_6 },
+      position: { x: 330, y: ROW_7 },
     },
   ],
   edges: [
@@ -177,6 +190,38 @@ export const graph: Graph = {
       target: "ResearchTeam",
       sourceHandle: "top",
       targetHandle: "right",
+      animated: true,
+    },
+    {
+      id: "ResearchTeam->ImageGenerator",
+      source: "ResearchTeam",
+      target: "ImageGenerator",
+      sourceHandle: "left",
+      targetHandle: "top",
+      animated: true,
+    },
+    {
+      id: "ResearchTeam->SpeechGenerator",
+      source: "ResearchTeam",
+      target: "SpeechGenerator",
+      sourceHandle: "bottom",
+      targetHandle: "left",
+      animated: true,
+    },
+    {
+      id: "ImageGenerator->ResearchTeam",
+      source: "ImageGenerator",
+      target: "ResearchTeam",
+      sourceHandle: "right",
+      targetHandle: "left",
+      animated: true,
+    },
+    {
+      id: "SpeechGenerator->ResearchTeam",
+      source: "SpeechGenerator",
+      target: "ResearchTeam",
+      sourceHandle: "right",
+      targetHandle: "bottom",
       animated: true,
     },
   ],

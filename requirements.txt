@@ -1,0 +1,15 @@
+# Core dependencies
+google-genai>=0.6.0
+pytest>=8.0.0
+python-dotenv>=1.0.0
+
+# Image generation dependencies
+Pillow>=10.0.0
+
+# Audio dependencies
+wave>=0.0.2
+
+# Development dependencies
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.0.0 

@@ -56,6 +56,27 @@ export const playbook = {
     },
     {
       description:
+        "The Image Generator is responsible for creating images from text descriptions using Google's Imagen-3 model.",
+      activeNodes: ["ResearchTeam", "ImageGenerator"],
+      activeEdges: ["ResearchTeam->ImageGenerator", "ImageGenerator->ResearchTeam"],
+      tooltipPosition: "left",
+    },
+    {
+      description:
+        "The Speech Generator converts text to natural-sounding speech using Google's Gemini TTS.",
+      tooltipPosition: "right",
+      activeNodes: ["ResearchTeam", "SpeechGenerator"],
+      activeEdges: ["ResearchTeam->SpeechGenerator", "SpeechGenerator->ResearchTeam"],
+    },
+    {
+      description:
+        "Once the generation tasks are completed, the agents will hand over to the Planner.",
+      activeNodes: ["ResearchTeam", "Planner"],
+      activeEdges: ["ResearchTeam->Planner"],
+      tooltipPosition: "left",
+    },
+    {
+      description:
         "Once the research tasks are completed, the Researcher will hand over to the Planner.",
       activeNodes: ["ResearchTeam", "Planner"],
       activeEdges: ["ResearchTeam->Planner"],

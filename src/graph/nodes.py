@@ -494,3 +494,33 @@ async def coder_node(
         "coder",
         [python_repl_tool],
     )
+
+
+async def image_generator_node(
+    state: State, config: RunnableConfig
+) -> Command[Literal["research_team"]]:
+    """Image generator node that generates images from text descriptions."""
+    logger.info("Image generator node is generating images.")
+    from src.tools.imagen import generate_image
+    tools = [generate_image]
+    return await _setup_and_execute_agent_step(
+        state,
+        config,
+        "image_generator",
+        tools,
+    )
+
+
+async def speech_generator_node(
+    state: State, config: RunnableConfig
+) -> Command[Literal["research_team"]]:
+    """Speech generator node that converts text to speech."""
+    logger.info("Speech generator node is generating speech.")
+    from src.tools.speech import generate_speech, generate_multi_speaker_speech
+    tools = [generate_speech, generate_multi_speaker_speech]
+    return await _setup_and_execute_agent_step(
+        state,
+        config,
+        "speech_generator",
+        tools,
+    )
