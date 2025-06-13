@@ -17,6 +17,7 @@ from .nodes import (
     background_investigation_node,
     image_generator_node,
     speech_generator_node,
+    video_generator_node,
 )
 
 
@@ -37,6 +38,8 @@ def continue_to_running_research_team(state: State):
         return "image_generator"
     if step.step_type and step.step_type == StepType.SPEECH_GENERATION:
         return "speech_generator"
+    if step.step_type and step.step_type == StepType.VIDEO_GENERATION:
+        return "video_generator"
     return "planner"
 
 
@@ -53,12 +56,13 @@ def _build_base_graph():
     builder.add_node("coder", coder_node)
     builder.add_node("image_generator", image_generator_node)
     builder.add_node("speech_generator", speech_generator_node)
+    builder.add_node("video_generator", video_generator_node)
     builder.add_node("human_feedback", human_feedback_node)
     builder.add_edge("background_investigator", "planner")
     builder.add_conditional_edges(
         "research_team",
         continue_to_running_research_team,
-        ["planner", "researcher", "coder", "image_generator", "speech_generator"],
+        ["planner", "researcher", "coder", "image_generator", "speech_generator", "video_generator"],
     )
     builder.add_edge("reporter", END)
     return builder

@@ -39,7 +39,7 @@ def handoff_to_planner(
     task_title: Annotated[str, "The title of the task to be handed off."],
     locale: Annotated[str, "The user's detected language locale (e.g., en-US, zh-CN)."],
 ):
-    """Handoff to planner agent to do plan."""
+    """Handoff to planner agent to create research plans and handle content generation tasks including image generation, speech generation, and video generation."""
     # This tool is not returning anything: we're just using it
     # as a way for LLM to signal that it needs to hand off to planner agent
     return
@@ -137,13 +137,32 @@ def planner_node(
     if curr_plan.get("has_enough_context"):
         logger.info("Planner response has enough context.")
         new_plan = Plan.model_validate(curr_plan)
-        return Command(
-            update={
-                "messages": [AIMessage(content=full_response, name="planner")],
-                "current_plan": new_plan,
-            },
-            goto="reporter",
+        
+        # Check if the plan contains content generation steps
+        has_content_generation = any(
+            step.step_type in ["image_generation", "speech_generation", "video_generation"]
+            for step in new_plan.steps
         )
+        
+        # If there are content generation steps, execute them first
+        if has_content_generation:
+            logger.info("Plan contains content generation steps, executing them.")
+            return Command(
+                update={
+                    "messages": [AIMessage(content=full_response, name="planner")],
+                    "current_plan": full_response,  # Keep as string for human_feedback_node
+                },
+                goto="human_feedback",
+            )
+        else:
+            # For research-only plans with enough context, go directly to reporter
+            return Command(
+                update={
+                    "messages": [AIMessage(content=full_response, name="planner")],
+                    "current_plan": new_plan,
+                },
+                goto="reporter",
+            )
     return Command(
         update={
             "messages": [AIMessage(content=full_response, name="planner")],
@@ -186,8 +205,18 @@ def human_feedback_node(
         plan_iterations += 1
         # parse the plan
         new_plan = json.loads(current_plan)
-        if new_plan["has_enough_context"]:
+        
+        # Check if the plan contains content generation steps
+        has_content_generation = any(
+            step.get("step_type") in ["image_generation", "speech_generation", "video_generation"]
+            for step in new_plan.get("steps", [])
+        )
+        
+        if new_plan["has_enough_context"] and not has_content_generation:
+            # Only skip to reporter if there are no content generation steps
             goto = "reporter"
+        # If there are content generation steps, always go to research_team to execute them
+        
     except json.JSONDecodeError:
         logger.warning("Planner response is not a valid JSON")
         if plan_iterations > 0:
@@ -524,3 +553,12 @@ async def speech_generator_node(
         "speech_generator",
         tools,
     )
+
+
+async def video_generator_node(
+    state: State, config: RunnableConfig
+) -> Command[Literal["research_team"]]:
+    """Video generator node that generates videos from text descriptions."""
+    from src.tools.video import generate_video
+    tools = [generate_video]
+    return await _setup_and_execute_agent_step(state, config, "video_generator", tools)

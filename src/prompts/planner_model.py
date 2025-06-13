@@ -13,6 +13,7 @@ class StepType(str, Enum):
     PROCESSING = "processing"
     IMAGE_GENERATION = "image_generation"
     SPEECH_GENERATION = "speech_generation"
+    VIDEO_GENERATION = "video_generation"
 
 
 class Step(BaseModel):

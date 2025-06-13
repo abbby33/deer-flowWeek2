@@ -19,6 +19,7 @@ AGENT_LLM_MAP: dict[str, LLMType] = {
     "prompt_enhancer": "basic",
     "image_generator": "basic",
     "speech_generator": "basic",
+    "video_generator": "basic",
 }
 
 # Team configuration
@@ -65,6 +66,19 @@ TEAM_MEMBER_CONFIGRATIONS = {
         "desc_for_llm": (
             "Uses Google's Gemini TTS to convert text into natural-sounding speech. "
             "Outputs the generated audio and any relevant feedback."
+        ),
+        "is_optional": True,
+        "llm_type": "basic",
+    },
+    "video_generator": {
+        "name": "video_generator",
+        "desc": (
+            "Responsible for generating videos from text descriptions using Azure OpenAI's Sora model"
+        ),
+        "desc_for_llm": (
+            "Uses Azure OpenAI's Sora model to generate high-quality videos from text descriptions. "
+            "Can create videos with specified dimensions, duration, and number of variants. "
+            "Outputs the generated video URLs and any relevant feedback."
         ),
         "is_optional": True,
         "llm_type": "basic",
