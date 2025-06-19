@@ -16,11 +16,15 @@ venv/
 # Environment variables
 .env
 
-# Google API credentials (security)
+# API credentials and keys (security)
 google_credentials.json
 *_credentials.json
 *.pem
 *.key
+
+# API configuration files with sensitive keys
+src/config/api_keys.yaml
+api_keys.yaml
 
 # Generated media files
 generated_images/

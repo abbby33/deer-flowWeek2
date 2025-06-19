@@ -1,0 +1,21 @@
+openai:
+  api_key: "key here"
+
+replicate:
+  api_key: "key here"
+
+
+models:
+  gpt-image-1:
+    default_quality: "medium"      
+    default_size: "1024x1024"
+  
+  flux-pulid:
+    model_version: "8baa7ef2255075b46f4d91cd238c21d31181b3e6a864463f967960bb0112525b"
+  
+  juggernaut-xl-v7:
+    model_version: "6a52feace43ce1f6bbc2cdabfc68423cb2319d7444a1a1dae529c5e88b976382"
+  
+  flux-kontext-pro:
+    model_name: "black-forest-labs/flux-kontext-pro"
+    mode: "img2img" 

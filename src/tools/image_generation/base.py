@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from schema.model_schemas import MODEL_SCHEMAS  
+from src.schema.model_schemas import MODEL_SCHEMAS  
 
 class ImageGenerationTool:
     def __init__(self, model_name: str):

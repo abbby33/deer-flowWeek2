@@ -2,28 +2,34 @@ import requests
 import time
 from typing import Dict, Any
 from src.tools.image_generation.base import ImageGenerationTool
-
-# 替换为你真实的 Replicate API Token
-REPLICATE_TOKEN = "your_token_here"  # 从环境变量或配置文件获取
-REPLICATE_MODEL_VERSION = "2c56db660f453e54fb816eaa7135a279d22a4f23937b854d77903ee21094d32b"  # flux-pulid的版本ID
+from src.config.api_config import get_api_config
 
 class FluxPulidTool(ImageGenerationTool):
     def __init__(self):
         super().__init__("flux-pulid")
+        self.config = get_api_config()
         self.api_url = "https://api.replicate.com/v1/predictions"
+        
+        # 获取API
+        replicate_key = self.config.get_replicate_key()
+        if not replicate_key:
+            raise ValueError("Replicate API key not configured. Please set REPLICATE_API_TOKEN environment variable or configure api_keys.yaml")
+        
         self.headers = {
-            "Authorization": f"Token {REPLICATE_TOKEN}",
+            "Authorization": f"Token {replicate_key}",
             "Content-Type": "application/json"
         }
+        
+        
+        self.model_version = self.config.get_model_version("flux-pulid") or "2c56db660f453e54fb816eaa7135a279d22a4f23937b854d77903ee21094d32b"
 
     def call_api(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """调用Replicate API生成图像"""
         body = {
-            "version": REPLICATE_MODEL_VERSION,
+            "version": self.model_version,
             "input": payload
         }
 
-        # 创建预测请求
+        
         response = requests.post(self.api_url, json=body, headers=self.headers)
         if not response.ok:
             raise RuntimeError(f"API request failed: {response.status_code} {response.text}")
@@ -31,8 +37,8 @@ class FluxPulidTool(ImageGenerationTool):
         data = response.json()
         prediction_id = data["id"]
 
-        # 轮询等待结果
-        max_attempts = 60  # 最多等待5分钟
+       
+        max_attempts = 60  
         for attempt in range(max_attempts):
             poll_response = requests.get(f"{self.api_url}/{prediction_id}", headers=self.headers)
             poll_data = poll_response.json()
@@ -52,7 +58,7 @@ class FluxPulidTool(ImageGenerationTool):
                 error_detail = poll_data.get("error", "Unknown error")
                 raise RuntimeError(f"Prediction failed: {error_detail}")
             elif status in ["starting", "processing"]:
-                time.sleep(5)  # 等待5秒后重试
+                time.sleep(5) 
                 continue
             else:
                 raise RuntimeError(f"Unexpected status: {status}")

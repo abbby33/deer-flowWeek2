@@ -2,23 +2,30 @@ import requests
 import time
 from typing import Dict, Any
 from src.tools.image_generation.base import ImageGenerationTool
-
-
-REPLICATE_TOKEN = "your_token_here"
-JUGGERNAUT_MODEL_VERSION = "bdd0319b-c4a5-4acb-9774-7cf3c4c4f97f"  # Juggernaut XL v7的版本ID
+from src.config.api_config import get_api_config
 
 class JuggernautTool(ImageGenerationTool):
     def __init__(self):
         super().__init__("juggernaut-xl-v7")
+        self.config = get_api_config()
         self.api_url = "https://api.replicate.com/v1/predictions"
+        
+        # 获取API密钥
+        replicate_key = self.config.get_replicate_key()
+        if not replicate_key:
+            raise ValueError("Replicate API key not configured. Please set REPLICATE_API_TOKEN environment variable or configure api_keys.yaml")
+        
         self.headers = {
-            "Authorization": f"Token {REPLICATE_TOKEN}",
+            "Authorization": f"Token {replicate_key}",
             "Content-Type": "application/json"
         }
+        
+        # 获取模型版本
+        self.model_version = self.config.get_model_version("juggernaut-xl-v7") or "bdd0319b-c4a5-4acb-9774-7cf3c4c4f97f"
 
     def call_api(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         body = {
-            "version": JUGGERNAUT_MODEL_VERSION,
+            "version": self.model_version,
             "input": payload
         }
 

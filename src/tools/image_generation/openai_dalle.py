@@ -1,43 +1,92 @@
-import requests
+import base64
 from typing import Dict, Any
+from openai import OpenAI
 from src.tools.image_generation.base import ImageGenerationTool
+from src.config.api_config import get_api_config
 
-
-OPENAI_API_KEY = "your_openai_api_key_here"
-
-class OpenAIDalleTool(ImageGenerationTool):
+class GPTImageTool(ImageGenerationTool):
     def __init__(self):
-        super().__init__("chatgpt-image-1")
-        self.api_url = "https://api.openai.com/v1/images/generations"
-        self.headers = {
-            "Authorization": f"Bearer {OPENAI_API_KEY}",
-            "Content-Type": "application/json"
-        }
+        super().__init__("gpt-image-1")
+        self.config = get_api_config()
+        
+        
+        openai_key = self.config.get_openai_key()
+        if not openai_key:
+            raise ValueError("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable or configure api_keys.yaml")
+        
+        self.client = OpenAI(api_key=openai_key)
 
     def call_api(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-       
-        body = {
-            "model": "dall-e-3",  
-            "prompt": payload["prompt"],
-            "n": payload.get("n", 1),
-            "size": payload.get("size", "1024x1024"),
-            "quality": payload.get("quality", "standard"),
-            "response_format": "url"
-        }
-
-        response = requests.post(self.api_url, json=body, headers=self.headers)
-        if not response.ok:
-            error_detail = response.json().get("error", {}).get("message", response.text)
-            raise RuntimeError(f"OpenAI API request failed: {response.status_code} - {error_detail}")
-
-        data = response.json()
-        image_url = data["data"][0]["url"]
         
-        return {
-            "image_url": image_url,
-            "metadata": {
-                "size": payload.get("size", "1024x1024"),
-                "quality": payload.get("quality", "standard"),
-                "revised_prompt": data["data"][0].get("revised_prompt")  
+        
+        if "image" in payload and payload["image"]:
+            return self._call_edit_api(payload)
+        else:
+            return self._call_generate_api(payload)
+    
+    def _call_generate_api(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            generate_params = {
+                "model": "gpt-image-1",
+                "prompt": payload["prompt"],
+                "size": payload.get("size", "1024x1024")
             }
-        }
+            
+            if "quality" in payload:
+                generate_params["quality"] = payload["quality"]
+            
+            response = self.client.images.generate(**generate_params)
+            
+            image_b64 = response.data[0].b64_json
+            
+            
+            image_url = f"data:image/png;base64,{image_b64}"
+            
+            return {
+                "image_url": image_url,
+                "metadata": {
+                    "mode": "text-to-image",
+                    "size": payload.get("size", "1024x1024"),
+                    "quality": payload.get("quality", "standard"),
+                    "model": "gpt-image-1"
+                }
+            }
+            
+        except Exception as e:
+            raise RuntimeError(f"GPT-Image-1 generation failed: {str(e)}")
+    
+    def _call_edit_api(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            image_input = payload["image"]
+            
+            edit_params = {
+                "model": "gpt-image-1",
+                "prompt": payload["prompt"],
+                "image": [image_input],  
+                "size": payload.get("size", "1024x1024"),
+                "quality": payload.get("quality", "standard")
+            }
+            
+            
+            if "mask" in payload and payload["mask"]:
+                edit_params["mask"] = payload["mask"]
+            
+            response = self.client.images.edit(**edit_params)
+            
+            
+            image_b64 = response.data[0].b64_json
+            image_url = f"data:image/png;base64,{image_b64}"
+            
+            return {
+                "image_url": image_url,
+                "metadata": {
+                    "mode": "image-to-image",
+                    "size": payload.get("size", "1024x1024"),
+                    "quality": payload.get("quality", "standard"),
+                    "has_mask": "mask" in payload,
+                    "model": "gpt-image-1"
+                }
+            }
+            
+        except Exception as e:
+            raise RuntimeError(f"GPT-Image-1 editing failed: {str(e)}")
